@@ -1,0 +1,2 @@
+﻿alert("ass");
+alert("ass");

@@ -1,0 +1,141 @@
+﻿@model List<UV>
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@*<div class="jumbotron">
+        <h1>ASP.NET</h1>
+        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
+        <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    </div>*@
+
+<div class="row">
+    @*<ul>
+            @foreach (var item in Model)
+            {
+                <li>
+                    @string.Format("{0}紫外線程度{1}最後發佈時間{2}", item.SiteName, item.UVI, item.PublishTime)
+            </li>
+            }
+
+        </ul>*@
+</div>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div data-item class="col-sm-3">
+            <div class="hero-widget well well-sm">
+                <div class="icon @ChangeColor(item.UVI)">
+                    <i class="fa fa-smile-o"></i>
+                </div>
+                <div class="text">
+                    <var>@(string.IsNullOrWhiteSpace(item.UVI) ? "..." : item.UVI)</var>
+                    <label class="text-muted">@item.PublishTime</label>
+                </div>
+                <div class="options">
+                    <a href="#" class="btn btn-primary btn-lg"> @item.SiteName</a>
+                </div>
+            </div>
+        </div>
+    }
+    @*<div class="col-sm-3">
+            <div class="hero-widget well well-sm">
+                <div class="icon text-warning">
+                    <i class="fa fa-meh-o"></i>
+                </div>
+                <div class="text">
+                    <var>3</var>
+                    <label class="text-muted">invited guests</label>
+                </div>
+                <div class="options">
+                    <a href="javascript:;" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-plus"></i> Add a guest</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="hero-widget well well-sm">
+                <div class="icon text-danger">
+                    <i class="fa fa-frown-o"></i>
+                </div>
+                <div class="text">
+                    <var>3</var>
+                    <label class="text-muted">invited guests</label>
+                </div>
+                <div class="options">
+                    <a href="javascript:;" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-plus"></i> Add a guest</a>
+                </div>
+            </div>
+        </div>*@
+</div>
+@Html.Hidden("geocode", Url.Action("cityName", "Home"))
+@helper ChangeColor(string uvi)
+{
+    var iUvi = 0;
+    int.TryParse(uvi, out iUvi);
+    if (iUvi < 5)
+    {
+        @("text-success")
+    }
+    else if (iUvi > 4 && iUvi < 9)
+    {
+        @("text-warning")
+    }
+    else
+    {
+        @("text-danger")
+    }
+}
+
+@section scripts
+{
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script type="text/javascript">
+            $(function () {
+                if ($("[data-item]").length > 5) {
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        saveCityName(position.coords.latitude, position.coords.longitude);
+                    },
+                        function (error) {
+                            switch (error.code) {
+                                case error.TIMEOUT:
+                                    {
+                                        alert('連線逾時');
+                                        break;
+                                    }
+                                case error.POSITION_UNAVAILABLE:
+                                    {
+                                        alert('無法取得定位');
+                                        break;
+                                    }
+                                case error.PERMISSION_DENIED:
+                                    {
+                                        alert('不要拒絕我阿!');
+                                        break;
+                                    }
+                                case error.UNKNOWN_ERROR:
+                                    {
+                                        alert('不明的錯誤，請稍候再試');
+                                        break;
+                                    }
+                            }
+                        });
+
+                    function saveCityName(latitude, longitude) {
+                        $.ajax({
+                            type: "get",
+                            url: "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=" + latitude + "," + longitude,
+                            dataType: "json",
+                            success: function (response) {
+                                $.post($("#geocode").val(), { name: response.results[response.results.length - 2]["address_components"][0].long_name }, function () {
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        </script>
+    }
+}
